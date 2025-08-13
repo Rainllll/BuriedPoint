@@ -12,41 +12,82 @@ option(BUILD_BURIED_EXAMPLES "构建示例程序" OFF)      # 默认不构建示
 option(BUILD_BURIED_TEST "构建单元测试" OFF)          # 默认不构建测试
 option(BUILD_BURIED_FOR_MT "使用/MT运行时库（静态链接运行时库）" OFF)
 
-# 多进程编译选项（加快编译速度）
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-
-# MT运行时库配置
-if(BUILD_BURIED_FOR_MT)
-    # 调试版本使用MTd
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-    # 发布版本使用MT
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+# 跨平台编译器配置
+if(MSVC)
+    # Windows MSVC编译器配置
+    # 多进程编译选项（加快编译速度）
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    
+    # MT运行时库配置
+    if(BUILD_BURIED_FOR_MT)
+        # 调试版本使用MTd
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+        # 发布版本使用MT
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    endif()
+    
+    # 生成PDB调试符号文件配置
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")  # 生成调试信息
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE
+        "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")  # 链接器优化选项
+    
+    # 语言标准设置
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")  # C++20标准
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /std:c11")        # C11标准
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # GCC/Clang编译器配置
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    
+    # 编译选项
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+    
+    # 调试信息
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+    
+    # 优化选项
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 endif()
 
-# 系统库依赖
-set(LIBS ${LIBS} 
-    winmm      # Windows多媒体库
-    iphlpapi   # IP帮助API
-    ws2_32     # Winsock2
-    dbghelp    # 调试帮助库
-    Kernel32   # Windows内核API
-)
-
-# 生成PDB调试符号文件配置
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")  # 生成调试信息
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi")
-set(CMAKE_SHARED_LINKER_FLAGS_RELEASE
-    "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")  # 链接器优化选项
+# 平台特定的系统库依赖
+if(WIN32)
+    # Windows系统库
+    set(LIBS ${LIBS} 
+        winmm      # Windows多媒体库
+        iphlpapi   # IP帮助API
+        ws2_32     # Winsock2
+        dbghelp    # 调试帮助库
+        Kernel32   # Windows内核API
+    )
+elseif(APPLE)
+    # macOS系统库
+    find_library(FOUNDATION_FRAMEWORK Foundation)
+    find_library(CORESERVICES_FRAMEWORK CoreServices)
+    set(LIBS ${LIBS} 
+        ${FOUNDATION_FRAMEWORK}
+        ${CORESERVICES_FRAMEWORK}
+        pthread
+    )
+elseif(UNIX)
+    # Linux系统库
+    set(LIBS ${LIBS} 
+        pthread
+        dl
+        rt
+    )
+endif()
 
 # 包含目录设置
 set(INCDIRS . lib ${CMAKE_BINARY_DIR})
 include_directories(${INCDIRS})
-
-# 语言标准设置
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")  # C++20标准
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /std:c11")        # C11标准
 
 # 构建类型信息输出
 message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")

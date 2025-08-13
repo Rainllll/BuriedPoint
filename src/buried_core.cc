@@ -1,5 +1,7 @@
 #include "buried_core.h"
 
+#include <filesystem>
+
 #include "common/common_service.h"
 #include "context/context.h"
 #include "report/buried_report.h"

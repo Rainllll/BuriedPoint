@@ -2,8 +2,18 @@
 
 #include <stdint.h>  // 使用标准整型类型
 
-// 定义导出宏（Windows平台动态库导出标记）
-#define BURIED_EXPORT __declspec(dllexport)
+// 跨平台导出宏定义
+#ifdef _WIN32
+    #ifdef BURIED_EXPORTS
+        #define BURIED_EXPORT __declspec(dllexport)
+    #else
+        #define BURIED_EXPORT __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #define BURIED_EXPORT __attribute__((visibility("default")))
+#else
+    #define BURIED_EXPORT
+#endif
 
 // C语言接口声明（保证C/C++兼容性）
 extern "C" {
