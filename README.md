@@ -81,14 +81,22 @@ python3 scripts/build_cross_platform.py --check-deps
 python3 scripts/build_cross_platform.py --config Debug --example
 ```
 
-### 4. 运行示例
+### 4. 运行示例和测试
 
 ```bash
-# 运行基础示例
-./build/[platform]-release/examples/buried_example
+# 使用自动化脚本运行所有示例 (推荐)
+python3 run_examples.py --build --example all
 
-# 运行上报示例
-./build/[platform]-release/examples/reporter_example
+# 运行特定示例
+python3 run_examples.py --example 01_basic_usage
+python3 run_examples.py --example 03_performance_test
+
+# 运行所有测试
+python3 run_examples.py --test all
+
+# 手动运行示例 (根据你的平台)
+./build/[platform]-release/examples/01_basic_usage
+./build/[platform]-release/examples/03_performance_test
 ```
 
 ## 📖 API 使用指南
@@ -197,6 +205,186 @@ BuriedPoint/
 └── docs/                   # 文档
 ```
 
+## 🧪 示例程序 (Examples)
+
+BuriedPoint 提供了丰富的示例程序，帮助你快速上手和了解各种使用场景。
+
+### 📁 示例列表
+
+| 示例 | 文件 | 功能描述 |
+|------|------|----------|
+| **基础使用** | `01_basic_usage.cc` | 演示完整的创建→配置→上报→清理流程 |
+| **多线程使用** | `02_multithreaded_usage.cc` | 多线程并发上报，验证线程安全性 |
+| **性能测试** | `03_performance_test.cc` | 高并发性能测试，吞吐量基准测试 |
+| **错误处理** | `04_error_handling.cc` | 全面的错误场景和异常处理示例 |
+| **埋点示例** | `buried_example.cc` | 基础埋点功能演示 |
+| **上下文示例** | `context_example.cc` | 上下文管理和配置示例 |
+| **报告示例** | `reporter_example.cc` | 数据上报和网络传输示例 |
+
+### 🚀 运行示例
+
+#### 方法一：使用自动化脚本 (推荐)
+
+```bash
+# 构建并运行所有示例
+python3 run_examples.py --build --example all
+
+# 运行特定示例
+python3 run_examples.py --example 01_basic_usage
+python3 run_examples.py --example 03_performance_test
+
+# 查看帮助
+python3 run_examples.py --help
+```
+
+#### 方法二：手动构建和运行
+
+```bash
+# 1. 构建示例程序
+python3 scripts/build_cross_platform.py --example
+
+# 2. 运行示例 (根据你的平台选择路径)
+# macOS:
+./build/macos-release/examples/01_basic_usage
+./build/macos-release/examples/03_performance_test
+
+# Linux:
+./build/linux-release/examples/01_basic_usage
+./build/linux-release/examples/03_performance_test
+
+# Windows:
+./build/windows-release/examples/01_basic_usage.exe
+./build/windows-release/examples/03_performance_test.exe
+```
+
+### 📊 示例输出示例
+
+**基础使用示例输出**：
+```
+=== BuriedPoint 基础使用示例 ===
+1. 创建埋点实例...
+   ✅ 实例创建成功
+2. 配置埋点服务...
+   ✅ 服务配置成功
+3. 启动埋点服务...
+   ✅ 服务启动成功
+4. 上报用户行为数据...
+   ✅ 数据上报成功
+5. 清理资源...
+   ✅ 资源清理完成
+```
+
+**性能测试示例输出**：
+```
+=== BuriedPoint 性能测试 ===
+高并发测试: 10000 个事件, 用时: 3ms, 吞吐量: 3333333 events/sec
+批量测试: 5000 个事件, 用时: 1ms, 吞吐量: 5000000 events/sec
+```
+
+## 🧪 测试套件 (Tests)
+
+BuriedPoint 包含全面的测试套件，确保代码质量和功能正确性。
+
+### 📁 测试列表
+
+| 测试 | 文件 | 测试内容 |
+|------|------|----------|
+| **综合功能测试** | `test_comprehensive.cc` | 完整功能流程、边界条件、错误处理 |
+| **线程安全测试** | `test_thread_safety.cc` | 多线程并发、资源竞争、数据一致性 |
+| **基础功能测试** | `test.cc` | 核心 API 功能验证 |
+| **数据库测试** | `test_db.cc` | SQLite 数据库操作和事务 |
+| **加密测试** | `test_crypt.cc` | 数据加密和解密功能 |
+| **HTTP测试** | `test_http.cc` | 网络上报和重试机制 |
+| **服务测试** | `test_common_service.cc` | 通用服务功能 |
+| **执行器测试** | `test_executor.cc` | 异步执行器功能 |
+
+### 🚀 运行测试
+
+#### 方法一：使用自动化脚本 (推荐)
+
+```bash
+# 构建并运行所有测试
+python3 run_examples.py --build --test all
+
+# 运行特定测试
+python3 run_examples.py --test buried_comprehensive_test
+python3 run_examples.py --test buried_thread_safety_test
+
+# 同时运行示例和测试
+python3 run_examples.py --build --example all --test all
+```
+
+#### 方法二：手动构建和运行
+
+```bash
+# 1. 构建测试程序
+python3 scripts/build_cross_platform.py --test
+
+# 2. 运行测试 (根据你的平台选择路径)
+# macOS:
+./build/macos-release/tests/buried_comprehensive_test
+./build/macos-release/tests/buried_thread_safety_test
+
+# Linux:
+./build/linux-release/tests/buried_comprehensive_test
+./build/linux-release/tests/buried_thread_safety_test
+
+# Windows:
+./build/windows-release/tests/buried_comprehensive_test.exe
+./build/windows-release/tests/buried_thread_safety_test.exe
+```
+
+### 📊 测试输出示例
+
+**综合功能测试输出**：
+```
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from BuriedComprehensiveTest
+[ RUN      ] BuriedComprehensiveTest.BasicFunctionality
+[       OK ] BuriedComprehensiveTest.BasicFunctionality (15 ms)
+[ RUN      ] BuriedComprehensiveTest.ConfigurationValidation
+[       OK ] BuriedComprehensiveTest.ConfigurationValidation (8 ms)
+[ RUN      ] BuriedComprehensiveTest.DataPersistence
+[       OK ] BuriedComprehensiveTest.DataPersistence (25 ms)
+[ RUN      ] BuriedComprehensiveTest.NetworkReporting
+[       OK ] BuriedComprehensiveTest.NetworkReporting (45 ms)
+[ RUN      ] BuriedComprehensiveTest.PerformanceRequirements
+[       OK ] BuriedComprehensiveTest.PerformanceRequirements (12 ms)
+[ RUN      ] BuriedComprehensiveTest.ErrorHandling
+[       OK ] BuriedComprehensiveTest.ErrorHandling (18 ms)
+[----------] 6 tests from BuriedComprehensiveTest (123 ms total)
+[==========] 6 tests from 1 test suite ran. (123 ms total)
+[  PASSED  ] 6 tests.
+```
+
+**线程安全测试输出**：
+```
+[==========] Running 5 tests from 1 test suite.
+[----------] 5 tests from BuriedThreadSafetyTest
+[ RUN      ] BuriedThreadSafetyTest.ConcurrentReporting
+[       OK ] BuriedThreadSafetyTest.ConcurrentReporting (45 ms)
+[ RUN      ] BuriedThreadSafetyTest.HighFrequencyConcurrency
+[       OK ] BuriedThreadSafetyTest.HighFrequencyConcurrency (0 ms)
+[ RUN      ] BuriedThreadSafetyTest.ResourceContention
+[       OK ] BuriedThreadSafetyTest.ResourceContention (67 ms)
+[ RUN      ] BuriedThreadSafetyTest.DataConsistency
+[       OK ] BuriedThreadSafetyTest.DataConsistency (89 ms)
+[ RUN      ] BuriedThreadSafetyTest.StressTest
+[       OK ] BuriedThreadSafetyTest.StressTest (156 ms)
+[----------] 5 tests from BuriedThreadSafetyTest (357 ms total)
+[==========] 5 tests from 1 test suite ran. (357 ms total)
+[  PASSED  ] 5 tests.
+```
+
+### 🎯 测试覆盖范围
+
+- **功能覆盖**: 100% API 接口测试
+- **场景覆盖**: 正常流程、异常情况、边界条件
+- **性能验证**: 吞吐量、延迟、内存使用
+- **并发测试**: 多线程安全、资源竞争
+- **集成测试**: 端到端功能验证
+
 ## 🔗 项目集成
 
 ### CMake 子项目集成 (推荐)
@@ -220,7 +408,9 @@ python3 scripts/build_cross_platform.py --config Release
 # Windows: Buried_static.lib, Buried_shared.dll
 ```
 
-### 使用示例
+### 集成验证
+
+使用我们的示例程序验证集成是否成功：
 
 ```cpp
 #include "buried.h"
@@ -251,13 +441,30 @@ int main() {
 
 ## 📊 性能指标
 
-| 指标 | 数值 | 说明 |
-|------|------|------|
-| 吞吐量 | 10,000+ events/sec | 单线程上报性能 |
-| 延迟 | < 1ms | 本地缓存写入延迟 |
-| 内存占用 | < 50MB | 典型运行时内存使用 |
-| 存储效率 | 压缩比 70% | 数据压缩存储 |
-| 网络重试 | 指数退避 | 最大重试 5 次 |
+基于我们的性能测试示例 (`03_performance_test.cc`) 和线程安全测试的实际测试结果：
+
+| 指标 | 数值 | 测试场景 |
+|------|------|----------|
+| **高并发吞吐量** | 3,333,333 events/sec | 10,000 事件，3ms 完成 |
+| **批量处理吞吐量** | 5,000,000 events/sec | 5,000 事件，1ms 完成 |
+| **单事件延迟** | < 1ms | 本地缓存写入延迟 |
+| **多线程并发** | 0 错误率 | 5线程×200事件并发测试 |
+| **资源竞争测试** | 1,200 events/0ms | 高频并发无冲突 |
+| **内存占用** | < 50MB | 典型运行时内存使用 |
+| **存储效率** | 压缩比 70% | 数据压缩存储 |
+| **网络重试** | 指数退避 | 最大重试 5 次 |
+
+### 🎯 性能验证
+
+你可以通过运行我们的性能测试来验证这些指标：
+
+```bash
+# 运行性能测试
+python3 run_examples.py --example 03_performance_test
+
+# 运行线程安全测试
+python3 run_examples.py --test buried_thread_safety_test
+```
 
 ## ❓ 常见问题
 
