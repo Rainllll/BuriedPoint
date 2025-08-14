@@ -49,7 +49,7 @@ TEST(DbTest, DISABLED_BasicTest) {
   EXPECT_EQ(datas.size(), 3);
 
   for (int i = 0; i < 100; ++i) {
-    buried::BuriedDb::Data data{-1, i, i,
+    buried::BuriedDb::Data data{-1, i, static_cast<uint64_t>(i),
                                 std::vector<char>{'h', 'e', 'l', 'l', 'o'}};
     db.InsertData(data);
   }
