@@ -42,7 +42,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/yourusername/BuriedPoint.git
+git clone https://github.com/Rainllll//BuriedPoint.git
 cd BuriedPoint
 ```
 
@@ -195,6 +195,58 @@ BuriedPoint/
 ├── tests/                  # 单元测试
 ├── scripts/                # 构建脚本
 └── docs/                   # 文档
+```
+
+## 🔗 项目集成
+
+### CMake 子项目集成 (推荐)
+
+```cmake
+# 在你的 CMakeLists.txt 中
+add_subdirectory(path/to/BuriedPoint)
+target_link_libraries(YourProject PRIVATE Buried_static)
+target_include_directories(YourProject PRIVATE path/to/BuriedPoint/include)
+```
+
+### 预编译库集成
+
+```bash
+# 构建 BuriedPoint 库
+python3 scripts/build_cross_platform.py --config Release
+
+# 在项目中链接生成的库文件
+# Linux: libBuried_static.a, libBuried_shared.so
+# macOS: libBuried_static.a, libBuried_shared.dylib  
+# Windows: Buried_static.lib, Buried_shared.dll
+```
+
+### 使用示例
+
+```cpp
+#include "buried.h"
+
+int main() {
+    // 创建实例
+    Buried* buried = Buried_Create("./data");
+    
+    // 配置服务
+    BuriedConfig config;
+    config.host = "your-server.com";
+    config.port = "8080";
+    config.topic = "analytics";
+    config.user_id = "user123";
+    config.app_version = "1.0.0";
+    config.app_name = "MyApp";
+    config.custom_data = "{}";
+    
+    // 启动并使用
+    Buried_Start(buried, &config);
+    Buried_Report(buried, "event", "data", 1);
+    
+    // 清理资源
+    Buried_Destroy(buried);
+    return 0;
+}
 ```
 
 ## 📊 性能指标
