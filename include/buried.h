@@ -30,6 +30,10 @@ struct BuriedConfig {
   const char* app_version; // 应用程序版本号
   const char* app_name;    // 应用程序名称
   const char* custom_data; // 自定义元数据（JSON格式）
+  
+  // 上传配置参数（可选，使用0表示使用默认值）
+  uint32_t upload_batch_size;    // 每次上传的数据条数（默认10）
+  uint32_t upload_interval_ms;   // 上传间隔毫秒数（默认5000ms）
 };
 
 // 创建埋点实例（返回对象指针）
@@ -54,4 +58,22 @@ BURIED_EXPORT int32_t Buried_Start(Buried* buried, BuriedConfig* config);
 // @return 状态码（0表示成功）
 BURIED_EXPORT int32_t Buried_Report(Buried* buried, const char* title,
                                     const char* data, uint32_t priority);
+
+// 动态配置上传参数（线程安全）
+// @param buried 埋点对象指针
+// @param batch_size 每次上传的数据条数（1-100，0表示不修改）
+// @param interval_ms 上传间隔毫秒数（100-60000，0表示不修改）
+// @return 状态码（0表示成功，-1表示参数无效）
+BURIED_EXPORT int32_t Buried_SetUploadConfig(Buried* buried, 
+                                             uint32_t batch_size,
+                                             uint32_t interval_ms);
+
+// 获取当前上传配置（线程安全）
+// @param buried 埋点对象指针
+// @param batch_size 输出当前批量大小
+// @param interval_ms 输出当前上传间隔
+// @return 状态码（0表示成功）
+BURIED_EXPORT int32_t Buried_GetUploadConfig(Buried* buried,
+                                             uint32_t* batch_size,
+                                             uint32_t* interval_ms);
 }

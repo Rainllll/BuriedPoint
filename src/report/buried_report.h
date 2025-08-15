@@ -30,6 +30,12 @@ class BuriedReport {
   void Start();
 
   void InsertData(const BuriedData& data);
+  
+  // 动态配置上传参数
+  bool SetUploadConfig(uint32_t batch_size, uint32_t interval_ms);
+  
+  // 获取当前上传配置
+  void GetUploadConfig(uint32_t* batch_size, uint32_t* interval_ms);
 
  private:
   std::unique_ptr<BuriedReportImpl> impl_;

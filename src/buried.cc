@@ -45,6 +45,11 @@ int32_t Buried_Start(Buried* buried, BuriedConfig* config) {
   if (config->custom_data) {
     buried_config.custom_data = config->custom_data;
   }
+  
+  // 应用上传配置参数
+  buried_config.upload_batch_size = config->upload_batch_size;
+  buried_config.upload_interval_ms = config->upload_interval_ms;
+  
   return buried->Start(buried_config);
 }
 
@@ -54,5 +59,19 @@ int32_t Buried_Report(Buried* buried, const char* title, const char* data,
     return BuriedResult::kBuriedInvalidParam;
   }
   return buried->Report(title, data, priority);
+}
+
+int32_t Buried_SetUploadConfig(Buried* buried, uint32_t batch_size, uint32_t interval_ms) {
+  if (!buried) {
+    return BuriedResult::kBuriedInvalidParam;
+  }
+  return buried->SetUploadConfig(batch_size, interval_ms);
+}
+
+int32_t Buried_GetUploadConfig(Buried* buried, uint32_t* batch_size, uint32_t* interval_ms) {
+  if (!buried) {
+    return BuriedResult::kBuriedInvalidParam;
+  }
+  return buried->GetUploadConfig(batch_size, interval_ms);
 }
 }

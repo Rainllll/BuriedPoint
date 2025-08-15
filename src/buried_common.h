@@ -10,6 +10,8 @@ enum BuriedResult {
   kBuriedOk = 0,
   // 表示埋点操作因传入无效参数而失败
   kBuriedInvalidParam = 1,
+  // 表示埋点操作失败
+  kBuriedError = 2,
   // 表示埋点操作因未知原因失败
   kBuriedUnknown = -1,
 };
