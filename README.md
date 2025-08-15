@@ -9,14 +9,116 @@
 
 ## ✨ 核心特性
 
-- 🌍 **跨平台支持**: Windows、macOS、Linux 全平台兼容
-- 🚀 **高性能**: 多线程并发处理，异步数据上报
-- 🔒 **数据安全**: 支持数据加密存储和传输
-- 💾 **持久化**: SQLite 数据库存储，断网续传
-- 🔄 **自动重试**: 网络异常时自动重试机制
-- 📊 **优先级队列**: 支持数据优先级排序
-- 🧵 **线程安全**: 完全线程安全的 API 设计
-- 📦 **轻量级**: 最小化依赖，易于集成
+### 🌍 **跨平台支持**: Windows、macOS、Linux 全平台兼容
+
+**技术实现**:
+- **条件编译**: 使用 `#ifdef _WIN32`、`#elif defined(__APPLE__)`、`#elif defined(__linux__)` 实现平台特定代码
+- **设备ID存储**: Windows 使用注册表 (`HKEY_CURRENT_USER\Software\Buried`)，Unix-like 使用配置文件 (`~/.buried_config`)
+- **系统信息获取**: Windows 使用 `GetVersionEx` API，macOS 使用 `sysctlbyname`，Linux 解析 `/proc/version`
+- **进程时间获取**: Windows 使用 `GetProcessTimes`，macOS 使用 `proc_pidinfo`，Linux 解析 `/proc/[pid]/stat`
+
+```cpp
+// 跨平台设备ID存储示例
+#ifdef _WIN32
+    // Windows: 注册表存储
+    HKEY h_key;
+    RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\Buried", ...);
+    RegSetValueExA(h_key, "device_id", 0, REG_SZ, ...);
+#else
+    // Unix-like: 文件存储
+    std::string config_path = std::string(getenv("HOME")) + "/.buried_config";
+    std::ofstream file(config_path);
+    file << "device_id=" << device_id << std::endl;
+#endif
+```
+
+### 🚀 **高性能**: 多线程并发处理，异步数据上报
+
+**技术实现**:
+- **Boost.Asio 异步架构**: 使用 `io_context` 和 `strand` 实现非阻塞异步处理
+- **双线程设计**: 主线程处理用户调用，独立报告线程处理网络上报
+- **串行化保护**: 使用 `boost::asio::io_context::strand` 确保操作串行化执行
+- **智能队列**: 基于优先级的数据队列，高优先级数据优先处理
+
+```cpp
+// 异步数据上报实现
+Context::GetGlobalContext().GetReportStrand().post([this, data]() {
+    // 在专用线程中串行化执行
+    db_->InsertData(MakeDbData_(data));
+});
+```
+
+### 🔒 **数据安全**: 支持数据加密存储和传输
+
+**技术实现**:
+- **mbedTLS 加密库**: 使用 AES-256 算法进行数据加密
+- **HTTPS 传输**: 基于 Boost.Beast 的安全 HTTP 客户端
+- **本地加密存储**: SQLite 数据库中的敏感数据加密存储
+- **密钥管理**: 动态密钥生成和安全存储机制
+
+### 💾 **持久化**: SQLite 数据库存储，断网续传
+
+**技术实现**:
+- **SQLite3 嵌入式数据库**: 轻量级、无服务器的本地存储
+- **事务保护**: 使用 `transaction_guard()` 确保数据一致性
+- **断网缓存**: 网络不可用时自动存储到本地数据库
+- **自动同步**: 网络恢复后自动上报缓存数据
+
+```cpp
+// 事务保护的数据插入
+auto guard = storage_->transaction_guard();
+storage_->insert(data);
+guard.commit();  // 确保数据完整性
+```
+
+### 🔄 **自动重试**: 网络异常时自动重试机制
+
+**技术实现**:
+- **指数退避算法**: 重试间隔逐渐增加 (1s, 2s, 4s, 8s, 16s)
+- **最大重试限制**: 默认最多重试 5 次，避免无限重试
+- **智能错误分类**: 区分临时错误和永久错误，只对临时错误重试
+- **网络状态检测**: 自动检测网络连接状态
+
+### 📊 **优先级队列**: 支持数据优先级排序
+
+**技术实现**:
+- **三级优先级系统**: 1(低) - 2(中) - 3(高)，数值越大优先级越高
+- **数据库优先级字段**: SQLite 表中的 `priority` 字段支持排序
+- **智能调度**: 高优先级数据优先上报，低优先级数据批量处理
+- **内存队列**: 使用 `std::priority_queue` 进行内存中的优先级排序
+
+### 🧵 **线程安全**: 完全线程安全的 API 设计
+
+**技术实现**:
+- **Strand 串行化**: 使用 `boost::asio::io_context::strand` 保证操作串行化
+- **原子操作**: 关键状态使用 `std::atomic<bool>` 进行原子操作
+- **无锁设计**: 避免传统互斥锁，使用异步队列实现线程安全
+- **API 级保护**: 所有公开接口都通过 strand 保护，用户无需手动加锁
+
+```cpp
+// 线程安全的状态管理
+std::atomic<bool> is_start_{false};
+
+// 线程安全的数据上报
+boost::asio::io_context::strand report_strand_;
+report_strand_.post([this, data]() {
+    // 串行化执行，保证线程安全
+    ProcessData(data);
+});
+```
+
+### 📦 **轻量级**: 最小化依赖，易于集成
+
+**技术实现**:
+- **精选依赖**: 只使用必要的成熟库 (Boost.Asio, SQLite3, mbedTLS)
+- **静态链接选项**: 支持静态链接，减少部署复杂度
+- **模块化设计**: 核心功能模块化，可按需编译
+- **C API 接口**: 简洁的 C 风格 API，易于各种语言绑定
+
+**依赖大小**:
+- 静态库: ~2.5MB (包含所有依赖)
+- 动态库: ~1.8MB
+- 运行时内存: < 50MB
 
 ## 🏗️ 技术栈
 
