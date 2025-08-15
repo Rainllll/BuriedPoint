@@ -12,6 +12,8 @@
 #include <atomic>
 #include <random>
 #include <filesystem>
+#include <iomanip>
+#include <iostream>
 #include "include/buried.h"
 
 class ThreadSafetyTest : public ::testing::Test {
@@ -116,13 +118,21 @@ TEST_F(ThreadSafetyTest, HighFrequencyConcurrentReporting) {
     }
     
     auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     
     std::cout << "高频并发测试结果:" << std::endl;
     std::cout << "  成功上报: " << success_count.load() << std::endl;
     std::cout << "  错误次数: " << error_count.load() << std::endl;
-    std::cout << "  总耗时: " << duration.count() << " ms" << std::endl;
-    std::cout << "  吞吐量: " << (double)success_count.load() / (duration.count() / 1000.0) << " events/sec" << std::endl;
+    std::cout << "  总耗时: " << duration_ms.count() << " ms (" << duration_us.count() << " μs)" << std::endl;
+    
+    // 使用微秒精度计算吞吐量，避免除零
+    if (duration_us.count() > 0) {
+        double throughput = (double)success_count.load() / (duration_us.count() / 1000000.0);
+        std::cout << "  吞吐量: " << std::fixed << std::setprecision(0) << throughput << " events/sec" << std::endl;
+    } else {
+        std::cout << "  吞吐量: 测试时间过短，无法准确计算" << std::endl;
+    }
     
     EXPECT_EQ(error_count.load(), 0) << "不应该有任何错误";
     EXPECT_EQ(success_count.load(), thread_count * reports_per_thread);
