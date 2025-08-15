@@ -8,6 +8,9 @@
 - **[DYNAMIC_CONFIG_IMPLEMENTATION.md](./DYNAMIC_CONFIG_IMPLEMENTATION.md)** - 动态配置功能的详细实现分析
 - **[THREAD_SAFETY_ANALYSIS.md](./THREAD_SAFETY_ANALYSIS.md)** - 线程安全机制的深度技术分析
 
+### 📋 项目管理文档
+- **[BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md)** - 分支管理策略和文档分布说明
+
 ### 📋 文档说明
 
 **目的**: 这些文档提供了 BuriedPoint 项目的深入技术细节，包括：
@@ -33,6 +36,9 @@
 
 ### 想了解线程安全机制？
 👉 查看 [THREAD_SAFETY_ANALYSIS.md](./THREAD_SAFETY_ANALYSIS.md)
+
+### 想了解分支管理策略？
+👉 查看 [BRANCH_STRATEGY.md](./BRANCH_STRATEGY.md)
 
 ### 想了解基本使用？
 👉 查看项目根目录的 [README.md](../README.md)
