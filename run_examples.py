@@ -152,7 +152,7 @@ def main():
     parser.add_argument("--build", action="store_true", help="构建项目")
     parser.add_argument("--example", choices=[
         "01_basic_usage", "02_multithreaded_usage", 
-        "03_performance_test", "04_error_handling", "all"
+        "03_performance_test", "04_error_handling", "05_priority_demo", "all"
     ], help="运行指定示例")
     parser.add_argument("--test", choices=[
         "buried_test", "buried_comprehensive_test", 
@@ -192,7 +192,7 @@ def main():
     if args.example:
         examples = [
             "01_basic_usage", "02_multithreaded_usage", 
-            "03_performance_test", "04_error_handling"
+            "03_performance_test", "04_error_handling", "05_priority_demo"
         ] if args.example == "all" else [args.example]
         
         for example in examples:
